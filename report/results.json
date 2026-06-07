@@ -1,0 +1,696 @@
+{
+  "crew": {
+    "architecture": "crew",
+    "n_tasks": 18,
+    "success_rate": 1.0,
+    "tool_selection_accuracy": 1.0,
+    "groundedness": 0.9,
+    "latency_p50_ms": 1.5,
+    "latency_p95_ms": 5.4,
+    "cost_per_task": 0.00171,
+    "tokens_per_task": 388.5,
+    "inter_agent_overhead_pct": 8.86,
+    "cost_breakdown_by_agent": {
+      "synthesizer": 0.014382,
+      "data_analyst": 0.007327,
+      "advisor": 0.007296,
+      "router": 0.001552,
+      "guardian": 0.000219
+    },
+    "rows": [
+      {
+        "id": "stat_coffee_lastweek",
+        "category": "stat",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 1.0,
+        "latency_ms": 6.2,
+        "cost": 0.000724,
+        "tokens": 352,
+        "tools": [
+          "get_spending"
+        ],
+        "agents": [
+          "router",
+          "data_analyst",
+          "synthesizer"
+        ],
+        "answer": "$21.60 на каву. Це 4 транзакці(й), у середньому $5.40 кожна."
+      },
+      {
+        "id": "stat_top_categories",
+        "category": "stat",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 1.0,
+        "latency_ms": 2.0,
+        "cost": 0.00094,
+        "tokens": 269,
+        "tools": [
+          "top_categories"
+        ],
+        "agents": [
+          "router",
+          "data_analyst",
+          "synthesizer"
+        ],
+        "answer": "Топ категорій витрат за період:\n\n1. продукти — $1,167\n2. здоров'я — $209\n3. доставку їжі — $129\n4. комуналку — $91\n5. каву — $84.10"
+      },
+      {
+        "id": "stat_netflix_last",
+        "category": "stat",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 1.0,
+        "latency_ms": 0.7,
+        "cost": 0.000609,
+        "tokens": 201,
+        "tools": [
+          "last_payment"
+        ],
+        "agents": [
+          "router",
+          "data_analyst",
+          "synthesizer"
+        ],
+        "answer": "Останній платіж за Netflix — 2025-11-10 на $12 (20 дн. тому)."
+      },
+      {
+        "id": "stat_groceries_month",
+        "category": "stat",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 1.0,
+        "latency_ms": 1.8,
+        "cost": 0.000763,
+        "tokens": 378,
+        "tools": [
+          "get_spending"
+        ],
+        "agents": [
+          "router",
+          "data_analyst",
+          "synthesizer"
+        ],
+        "answer": "$1,167 на продукти. Це 17 транзакці(й), у середньому $68.65 кожна."
+      },
+      {
+        "id": "stat_delivery_year",
+        "category": "stat",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 1.0,
+        "latency_ms": 1.8,
+        "cost": 0.000781,
+        "tokens": 382,
+        "tools": [
+          "get_spending"
+        ],
+        "agents": [
+          "router",
+          "data_analyst",
+          "synthesizer"
+        ],
+        "answer": "$1,312 на доставку їжі. Це 54 транзакці(й), у середньому $24.31 кожна."
+      },
+      {
+        "id": "advice_save_200",
+        "category": "advice",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 0.778,
+        "latency_ms": 5.2,
+        "cost": 0.005694,
+        "tokens": 1333,
+        "tools": [
+          "list_subscriptions",
+          "time_of_day_breakdown",
+          "get_spending",
+          "get_spending"
+        ],
+        "agents": [
+          "router",
+          "data_analyst",
+          "advisor",
+          "synthesizer"
+        ],
+        "answer": "На основі даних за останні 3 місяці виділяю реалістичні варіанти:\n\n**1. Доставка їжі — $150/міс.** 50% замовлень після 21:00 — імпульсні. Зменшення вдвічі = ~$75.\n\n**2. Підписки — $35/міс.** Sportlife $15/міс — остання транзакція 146 дн. тому, ймовірно забута. Рекомендую перевірити. −$15/міс.\n\n**3. Кава поза домом — $84.83/міс.** Не пропоную відмовлятися повністю, але готувати вдома 2 дні на тиждень = ~$33.93.\n\nЗагалом ~$124. До цільових $200 не вистачає — потрібне глибше скорочення в одній з категорій. З чого почнемо?"
+      },
+      {
+        "id": "advice_subscriptions",
+        "category": "advice",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 1.0,
+        "latency_ms": 1.4,
+        "cost": 0.002772,
+        "tokens": 609,
+        "tools": [
+          "list_subscriptions"
+        ],
+        "agents": [
+          "router",
+          "data_analyst",
+          "advisor",
+          "synthesizer"
+        ],
+        "answer": "Активні підписки коштують $35/міс. \nОкремо звертаю увагу: Sportlife $15/міс — остання транзакція 2025-07-07 (146 дн. тому), ймовірно забута підписка. Варто перевірити і скасувати: −$15/міс.\nНайбільші активні: Apple One $15, Sportlife $15, Netflix $12, Spotify $5."
+      },
+      {
+        "id": "advice_credit_card",
+        "category": "advice",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 0.75,
+        "latency_ms": 2.7,
+        "cost": 0.003305,
+        "tokens": 689,
+        "tools": [
+          "monthly_summary",
+          "get_spending"
+        ],
+        "agents": [
+          "router",
+          "data_analyst",
+          "advisor",
+          "synthesizer"
+        ],
+        "answer": "Цього місяця чистий результат $60.76 (дохід $2,400, витрати $2,339). Щоб швидше закрити картку: спрямовуй будь-який місячний профіцит у повне погашення замість мінімального платежу $50 — мінімальний платіж майже весь йде у відсотки. Конкретний крок: налаштуй автосписання повного балансу в день зарплати (25-го)."
+      },
+      {
+        "id": "advice_forgotten_sub",
+        "category": "advice",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 1.0,
+        "latency_ms": 1.2,
+        "cost": 0.002739,
+        "tokens": 590,
+        "tools": [
+          "list_subscriptions"
+        ],
+        "agents": [
+          "router",
+          "data_analyst",
+          "advisor",
+          "synthesizer"
+        ],
+        "answer": "Активні підписки коштують $35/міс. \nОкремо звертаю увагу: Sportlife $15/міс — остання транзакція 2025-07-07 (146 дн. тому), ймовірно забута підписка. Варто перевірити і скасувати: −$15/міс.\nНайбільші активні: Apple One $15, Sportlife $15, Netflix $12, Spotify $5."
+      },
+      {
+        "id": "multi_delivery_halve",
+        "category": "multistep",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 1.0,
+        "latency_ms": 1.5,
+        "cost": 0.001286,
+        "tokens": 298,
+        "tools": [
+          "project_savings"
+        ],
+        "agents": [
+          "router",
+          "data_analyst",
+          "advisor",
+          "synthesizer"
+        ],
+        "answer": "Зараз на доставку їжі йде ~$152/міс. Якщо скоротити на 50%, економія складе $75.84/міс, тобто $910 за рік."
+      },
+      {
+        "id": "multi_month_positive",
+        "category": "multistep",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 1.0,
+        "latency_ms": 0.9,
+        "cost": 0.001535,
+        "tokens": 295,
+        "tools": [
+          "monthly_summary"
+        ],
+        "agents": [
+          "router",
+          "data_analyst",
+          "advisor",
+          "synthesizer"
+        ],
+        "answer": "За поточними темпами місяць закриється у плюс: прогноз чистого результату $60.76 (дохід $2,400, прогноз витрат $2,339; пройшло 30 з 30 днів)."
+      },
+      {
+        "id": "multi_year_compare",
+        "category": "multistep",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 1.0,
+        "latency_ms": 3.0,
+        "cost": 0.001808,
+        "tokens": 334,
+        "tools": [
+          "compare_periods"
+        ],
+        "agents": [
+          "router",
+          "data_analyst",
+          "advisor",
+          "synthesizer"
+        ],
+        "answer": "Витрати this_year — $26,053, last_year — $3,038. Різниця $23,015 (більше, 758%). Зверни увагу: дані за минулий рік охоплюють лише грудень, тож пряме порівняння обмежене."
+      },
+      {
+        "id": "multi_coffee_halve",
+        "category": "multistep",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 1.0,
+        "latency_ms": 1.5,
+        "cost": 0.001247,
+        "tokens": 293,
+        "tools": [
+          "project_savings"
+        ],
+        "agents": [
+          "router",
+          "data_analyst",
+          "advisor",
+          "synthesizer"
+        ],
+        "answer": "Зараз на каву йде ~$85.79/міс. Якщо скоротити на 50%, економія складе $42.89/міс, тобто $515 за рік."
+      },
+      {
+        "id": "fraud_booking",
+        "category": "fraud",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 0.333,
+        "latency_ms": 0.9,
+        "cost": 0.001916,
+        "tokens": 195,
+        "tools": [
+          "detect_suspicious"
+        ],
+        "agents": [
+          "router",
+          "guardian",
+          "synthesizer"
+        ],
+        "answer": "Схоже на можливий fraud. Блокування картки та оформлення chargeback виходять за межі моїх можливостей — це робить служба підтримки. Рекомендовані дії:\n\n1. Заблокувати картку: Картки → ця карта → Заблокувати\n2. Звернутися до служби підтримки через чат застосунку — у них окрема процедура для disputed transactions\n\nДо речі, по цій картці я бачу ще 2 велик(і) транзакці(ї), варто перевірити їх теж: AliExpress $231 (2025-04-16), Booking.com $703 (2025-01-15)."
+      },
+      {
+        "id": "fraud_unknown",
+        "category": "fraud",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 0.333,
+        "latency_ms": 0.9,
+        "cost": 0.001882,
+        "tokens": 179,
+        "tools": [
+          "detect_suspicious"
+        ],
+        "agents": [
+          "router",
+          "guardian",
+          "synthesizer"
+        ],
+        "answer": "Схоже на можливий fraud. Блокування картки та оформлення chargeback виходять за межі моїх можливостей — це робить служба підтримки. Рекомендовані дії:\n\n1. Заблокувати картку: Картки → ця карта → Заблокувати\n2. Звернутися до служби підтримки через чат застосунку — у них окрема процедура для disputed transactions\n\nДо речі, по цій картці я бачу ще 2 велик(і) транзакці(ї), варто перевірити їх теж: AliExpress $231 (2025-04-16), Booking.com $703 (2025-01-15)."
+      },
+      {
+        "id": "oos_stocks",
+        "category": "out_of_scope",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 1.0,
+        "latency_ms": 0.0,
+        "cost": 0.001023,
+        "tokens": 109,
+        "tools": [],
+        "agents": [
+          "router",
+          "guardian",
+          "synthesizer"
+        ],
+        "answer": "Це поза моїми можливостями — я допомагаю лише з твоїми витратами та заощадженнями (статистика, поради щодо економії, аналіз підписок). Інвестиціями чи покупкою активів я не займаюся. Хочеш, подивимось, де цього місяця можна зекономити?"
+      },
+      {
+        "id": "oos_crypto",
+        "category": "out_of_scope",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 1.0,
+        "latency_ms": 0.0,
+        "cost": 0.001023,
+        "tokens": 109,
+        "tools": [],
+        "agents": [
+          "router",
+          "guardian",
+          "synthesizer"
+        ],
+        "answer": "Це поза моїми можливостями — я допомагаю лише з твоїми витратами та заощадженнями (статистика, поради щодо економії, аналіз підписок). Інвестиціями чи покупкою активів я не займаюся. Хочеш, подивимось, де цього місяця можна зекономити?"
+      },
+      {
+        "id": "multiturn_coffee_month",
+        "category": "stat",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 1.0,
+        "latency_ms": 1.4,
+        "cost": 0.000729,
+        "tokens": 378,
+        "tools": [
+          "get_spending"
+        ],
+        "agents": [
+          "router",
+          "data_analyst",
+          "synthesizer"
+        ],
+        "answer": "$84.10 на каву. Це 17 транзакці(й), у середньому $4.95 кожна."
+      }
+    ]
+  },
+  "baseline": {
+    "architecture": "baseline",
+    "n_tasks": 18,
+    "success_rate": 1.0,
+    "tool_selection_accuracy": 1.0,
+    "groundedness": 0.9,
+    "latency_p50_ms": 1.3,
+    "latency_p95_ms": 3.3,
+    "cost_per_task": 0.002383,
+    "tokens_per_task": 456.2,
+    "inter_agent_overhead_pct": 0.0,
+    "cost_breakdown_by_agent": {
+      "baseline": 0.042888
+    },
+    "rows": [
+      {
+        "id": "stat_coffee_lastweek",
+        "category": "stat",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 1.0,
+        "latency_ms": 1.4,
+        "cost": 0.001911,
+        "tokens": 457,
+        "tools": [
+          "get_spending"
+        ],
+        "agents": [
+          "baseline"
+        ],
+        "answer": "$21.60 на каву. Це 4 транзакці(й), у середньому $5.40 кожна."
+      },
+      {
+        "id": "stat_top_categories",
+        "category": "stat",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 1.0,
+        "latency_ms": 1.1,
+        "cost": 0.001836,
+        "tokens": 364,
+        "tools": [
+          "top_categories"
+        ],
+        "agents": [
+          "baseline"
+        ],
+        "answer": "Топ категорій витрат за період:\n\n1. продукти — $1,167\n2. здоров'я — $209\n3. доставку їжі — $129\n4. комуналку — $91\n5. каву — $84.10"
+      },
+      {
+        "id": "stat_netflix_last",
+        "category": "stat",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 1.0,
+        "latency_ms": 0.6,
+        "cost": 0.001452,
+        "tokens": 304,
+        "tools": [
+          "last_payment"
+        ],
+        "agents": [
+          "baseline"
+        ],
+        "answer": "Останній платіж за Netflix — 2025-11-10 на $12 (20 дн. тому)."
+      },
+      {
+        "id": "stat_groceries_month",
+        "category": "stat",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 1.0,
+        "latency_ms": 1.4,
+        "cost": 0.002001,
+        "tokens": 483,
+        "tools": [
+          "get_spending"
+        ],
+        "agents": [
+          "baseline"
+        ],
+        "answer": "$1,167 на продукти. Це 17 транзакці(й), у середньому $68.65 кожна."
+      },
+      {
+        "id": "stat_delivery_year",
+        "category": "stat",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 1.0,
+        "latency_ms": 1.6,
+        "cost": 0.002025,
+        "tokens": 487,
+        "tools": [
+          "get_spending"
+        ],
+        "agents": [
+          "baseline"
+        ],
+        "answer": "$1,312 на доставку їжі. Це 54 транзакці(й), у середньому $24.31 кожна."
+      },
+      {
+        "id": "advice_save_200",
+        "category": "advice",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 0.778,
+        "latency_ms": 5.9,
+        "cost": 0.006567,
+        "tokens": 1185,
+        "tools": [
+          "list_subscriptions",
+          "time_of_day_breakdown",
+          "get_spending",
+          "get_spending"
+        ],
+        "agents": [
+          "baseline"
+        ],
+        "answer": "На основі даних за останні 3 місяці виділяю реалістичні варіанти:\n\n**1. Доставка їжі — $150/міс.** 50% замовлень після 21:00 — імпульсні. Зменшення вдвічі = ~$75.\n\n**2. Підписки — $35/міс.** Sportlife $15/міс — остання транзакція 146 дн. тому, ймовірно забута. Рекомендую перевірити. −$15/міс.\n\n**3. Кава поза домом — $84.83/міс.** Не пропоную відмовлятися повністю, але готувати вдома 2 дні на тиждень = ~$33.93.\n\nЗагалом ~$124. До цільових $200 не вистачає — потрібне глибше скорочення в одній з категорій. З чого почнемо?"
+      },
+      {
+        "id": "advice_subscriptions",
+        "category": "advice",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 1.0,
+        "latency_ms": 1.2,
+        "cost": 0.002853,
+        "tokens": 571,
+        "tools": [
+          "list_subscriptions"
+        ],
+        "agents": [
+          "baseline"
+        ],
+        "answer": "Активні підписки коштують $35/міс. \nОкремо звертаю увагу: Sportlife $15/міс — остання транзакція 2025-07-07 (146 дн. тому), ймовірно забута підписка. Варто перевірити і скасувати: −$15/міс.\nНайбільші активні: Apple One $15, Sportlife $15, Netflix $12, Spotify $5."
+      },
+      {
+        "id": "advice_credit_card",
+        "category": "advice",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 0.75,
+        "latency_ms": 2.5,
+        "cost": 0.003603,
+        "tokens": 649,
+        "tools": [
+          "monthly_summary",
+          "get_spending"
+        ],
+        "agents": [
+          "baseline"
+        ],
+        "answer": "Цього місяця чистий результат $60.76 (дохід $2,400, витрати $2,339). Щоб швидше закрити картку: спрямовуй будь-який місячний профіцит у повне погашення замість мінімального платежу $50 — мінімальний платіж майже весь йде у відсотки. Конкретний крок: налаштуй автосписання повного балансу в день зарплати (25-го)."
+      },
+      {
+        "id": "advice_forgotten_sub",
+        "category": "advice",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 1.0,
+        "latency_ms": 1.1,
+        "cost": 0.002835,
+        "tokens": 565,
+        "tools": [
+          "list_subscriptions"
+        ],
+        "agents": [
+          "baseline"
+        ],
+        "answer": "Активні підписки коштують $35/міс. \nОкремо звертаю увагу: Sportlife $15/міс — остання транзакція 2025-07-07 (146 дн. тому), ймовірно забута підписка. Варто перевірити і скасувати: −$15/міс.\nНайбільші активні: Apple One $15, Sportlife $15, Netflix $12, Spotify $5."
+      },
+      {
+        "id": "multi_delivery_halve",
+        "category": "multistep",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 1.0,
+        "latency_ms": 1.9,
+        "cost": 0.001695,
+        "tokens": 341,
+        "tools": [
+          "project_savings"
+        ],
+        "agents": [
+          "baseline"
+        ],
+        "answer": "Зараз на доставку їжі йде ~$152/міс. Якщо скоротити на 50%, економія складе $75.84/міс, тобто $910 за рік."
+      },
+      {
+        "id": "multi_month_positive",
+        "category": "multistep",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 1.0,
+        "latency_ms": 0.9,
+        "cost": 0.001803,
+        "tokens": 341,
+        "tools": [
+          "monthly_summary"
+        ],
+        "agents": [
+          "baseline"
+        ],
+        "answer": "За поточними темпами місяць закриється у плюс: прогноз чистого результату $60.76 (дохід $2,400, прогноз витрат $2,339; пройшло 30 з 30 днів)."
+      },
+      {
+        "id": "multi_year_compare",
+        "category": "multistep",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 1.0,
+        "latency_ms": 2.8,
+        "cost": 0.001926,
+        "tokens": 354,
+        "tools": [
+          "compare_periods"
+        ],
+        "agents": [
+          "baseline"
+        ],
+        "answer": "Витрати this_year — $26,053, last_year — $3,038. Різниця $23,015 (більше, 758%). Зверни увагу: дані за минулий рік охоплюють лише грудень, тож пряме порівняння обмежене."
+      },
+      {
+        "id": "multi_coffee_halve",
+        "category": "multistep",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 1.0,
+        "latency_ms": 1.5,
+        "cost": 0.001677,
+        "tokens": 339,
+        "tools": [
+          "project_savings"
+        ],
+        "agents": [
+          "baseline"
+        ],
+        "answer": "Зараз на каву йде ~$85.79/міс. Якщо скоротити на 50%, економія складе $42.89/міс, тобто $515 за рік."
+      },
+      {
+        "id": "fraud_booking",
+        "category": "fraud",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 0.333,
+        "latency_ms": 1.0,
+        "cost": 0.003147,
+        "tokens": 473,
+        "tools": [
+          "detect_suspicious"
+        ],
+        "agents": [
+          "baseline"
+        ],
+        "answer": "Схоже на можливий fraud. Блокування картки та оформлення chargeback виходять за межі моїх можливостей — це робить служба підтримки. Рекомендовані дії:\n\n1. Заблокувати картку: Картки → ця карта → Заблокувати\n2. Звернутися до служби підтримки через чат застосунку — у них окрема процедура для disputed transactions\n\nДо речі, по цій картці я бачу ще 2 велик(і) транзакці(ї), варто перевірити їх теж: AliExpress $231 (2025-04-16), Booking.com $703 (2025-01-15)."
+      },
+      {
+        "id": "fraud_unknown",
+        "category": "fraud",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 0.333,
+        "latency_ms": 1.2,
+        "cost": 0.003123,
+        "tokens": 465,
+        "tools": [
+          "detect_suspicious"
+        ],
+        "agents": [
+          "baseline"
+        ],
+        "answer": "Схоже на можливий fraud. Блокування картки та оформлення chargeback виходять за межі моїх можливостей — це робить служба підтримки. Рекомендовані дії:\n\n1. Заблокувати картку: Картки → ця карта → Заблокувати\n2. Звернутися до служби підтримки через чат застосунку — у них окрема процедура для disputed transactions\n\nДо речі, по цій картці я бачу ще 2 велик(і) транзакці(ї), варто перевірити їх теж: AliExpress $231 (2025-04-16), Booking.com $703 (2025-01-15)."
+      },
+      {
+        "id": "oos_stocks",
+        "category": "out_of_scope",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 1.0,
+        "latency_ms": 0.0,
+        "cost": 0.001203,
+        "tokens": 169,
+        "tools": [],
+        "agents": [
+          "baseline"
+        ],
+        "answer": "Це поза моїми можливостями — я допомагаю лише з твоїми витратами та заощадженнями (статистика, поради щодо економії, аналіз підписок). Інвестиціями чи покупкою активів я не займаюся. Хочеш, подивимось, де цього місяця можна зекономити?"
+      },
+      {
+        "id": "oos_crypto",
+        "category": "out_of_scope",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 1.0,
+        "latency_ms": 0.0,
+        "cost": 0.0012,
+        "tokens": 168,
+        "tools": [],
+        "agents": [
+          "baseline"
+        ],
+        "answer": "Це поза моїми можливостями — я допомагаю лише з твоїми витратами та заощадженнями (статистика, поради щодо економії, аналіз підписок). Інвестиціями чи покупкою активів я не займаюся. Хочеш, подивимось, де цього місяця можна зекономити?"
+      },
+      {
+        "id": "multiturn_coffee_month",
+        "category": "stat",
+        "success": 1.0,
+        "tool_accuracy": 1.0,
+        "groundedness": 1.0,
+        "latency_ms": 1.6,
+        "cost": 0.002031,
+        "tokens": 497,
+        "tools": [
+          "get_spending"
+        ],
+        "agents": [
+          "baseline"
+        ],
+        "answer": "$84.10 на каву. Це 17 транзакці(й), у середньому $4.95 кожна."
+      }
+    ]
+  }
+}

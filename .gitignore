@@ -216,3 +216,11 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+finance.db
+
+# Project artifacts
+finance.db
+finance_coach.db
+.env
+
+.idea/
