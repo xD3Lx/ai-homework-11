@@ -285,24 +285,36 @@ TOOL_SCHEMAS: list[dict] = [
         "type": "function",
         "function": {
             "name": "get_spending",
-            "description": "Total expenses for an optional category, merchant and/or period.",
+            "description": (
+                "Total expenses for an optional category, merchant and/or period. "
+                "ALWAYS select the relative period via the `period` enum — it is "
+                "resolved server-side against the system's current date, so never "
+                "compute calendar dates yourself."
+            ),
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "category": {"type": "string"},
+                    "category": {
+                        "type": "string",
+                        "enum": [
+                            "coffee", "groceries", "restaurants", "delivery",
+                            "transport", "entertainment", "shopping", "health",
+                            "subscriptions", "utilities", "travel", "credit_payment",
+                        ],
+                    },
                     "merchant": {"type": "string"},
                     "period": {
                         "type": "string",
+                        "description": "Relative window, resolved against the system 'today'.",
                         "enum": [
                             "last_week", "this_week", "this_month", "last_month",
                             "last_30_days", "last_3_months", "this_year",
                             "last_year", "all",
                         ],
                     },
-                    "start": {"type": "string", "description": "YYYY-MM-DD"},
-                    "end": {"type": "string", "description": "YYYY-MM-DD"},
                     "account": {"type": "string", "enum": ["main_debit", "credit_card"]},
                 },
+                "required": ["period"],
             },
         },
     },

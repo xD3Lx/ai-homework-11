@@ -23,9 +23,32 @@ import time
 from typing import Any, TypedDict
 
 from . import llm, tools
+from . import offline_brain as brain
 from .config import SETTINGS
 from .obs import traceable
 from .types import RunResult, TraceStep
+
+
+def _extract_json(text: str | None) -> dict | None:
+    """Parse a JSON object from an LLM reply that may include prose/code fences."""
+    if not text:
+        return None
+    import re
+
+    candidate = text.strip()
+    # strip ```json ... ``` fences
+    fence = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", candidate, re.S)
+    if fence:
+        candidate = fence.group(1)
+    else:
+        brace = re.search(r"\{.*\}", candidate, re.S)
+        if brace:
+            candidate = brace.group(0)
+    try:
+        obj = json.loads(candidate)
+        return obj if isinstance(obj, dict) else None
+    except (json.JSONDecodeError, TypeError):
+        return None
 
 try:
     from langgraph.graph import END, START, StateGraph  # type: ignore
@@ -33,6 +56,18 @@ try:
     HAVE_LANGGRAPH = True
 except Exception:
     HAVE_LANGGRAPH = False
+
+
+DATA_ANALYST_PROMPT = (
+    "Ти — Data Analyst фінансового помічника. Викликай інструменти, щоб дістати "
+    "точні числа для запиту. Не вигадуй суми.\n"
+    f"ВАЖЛИВО: поточна дата (today) у системі — {SETTINGS.today.isoformat()}. "
+    "Усі відносні періоди рахуй саме від неї, а НЕ від реальної сьогоднішньої дати.\n"
+    "Для відносних діапазонів завжди використовуй параметр `period` "
+    "(last_week, this_week, this_month, last_month, last_30_days, last_3_months, "
+    "this_year, last_year), а не власноруч пораховані start/end. "
+    "Передавай start/end лише коли користувач назвав конкретні дати."
+)
 
 
 class CrewState(TypedDict, total=False):
@@ -57,7 +92,14 @@ def node_router(state: CrewState) -> CrewState:
     s0 = time.perf_counter()
     resp = llm.complete("router", state["query"], history=_hist_users(state),
                         model=SETTINGS.model_cheap)
-    ctx = json.loads(resp.content)
+    # robust parse; fall back to the deterministic classifier if the LLM
+    # returned prose instead of clean JSON.
+    parsed = _extract_json(resp.content)
+    fallback = brain.classify(state["query"], _hist_users(state))
+    ctx = {k: (parsed.get(k) if parsed else None) or fallback.get(k)
+           for k in ("intent", "category", "merchant", "period")} if parsed else fallback
+    if ctx.get("intent") not in {"stat", "advice", "multistep", "fraud", "out_of_scope"}:
+        ctx["intent"] = fallback["intent"]
     res.agents_used.append("router")
     res.inter_agent_tokens += resp.usage["prompt_tokens"]
     _acc(res, resp, "agent", "router", f"intent={ctx['intent']}",
@@ -92,8 +134,7 @@ def node_guardian(state: CrewState) -> CrewState:
 def node_data_analyst(state: CrewState) -> CrewState:
     res = state["result"]
     messages = [
-        {"role": "system", "content": "Ти — Data Analyst. Викликай інструменти, щоб "
-                                      "дістати точні числа для запиту. Не вигадуй суми."},
+        {"role": "system", "content": DATA_ANALYST_PROMPT},
     ]
     for h in state.get("history", []):
         messages.append(h)

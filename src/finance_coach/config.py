@@ -36,8 +36,8 @@ class Settings:
     openrouter_base_url: str = os.getenv(
         "OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1"
     )
-    model_smart: str = os.getenv("MODEL_SMART", "anthropic/claude-3.5-sonnet")
-    model_cheap: str = os.getenv("MODEL_CHEAP", "anthropic/claude-3.5-haiku")
+    model_smart: str = os.getenv("MODEL_SMART", "anthropic/claude-sonnet-4.5")
+    model_cheap: str = os.getenv("MODEL_CHEAP", "anthropic/claude-haiku-4.5")
     langsmith_api_key: str = os.getenv("LANGSMITH_API_KEY", "").strip()
     langsmith_project: str = os.getenv("LANGSMITH_PROJECT", "personal-finance-coach")
     now: str = os.getenv("FINANCE_COACH_NOW", "2025-11-30")
@@ -57,6 +57,8 @@ SETTINGS = Settings()
 
 # Approx OpenRouter prices ($ per 1M tokens) for cost estimation in offline traces.
 MODEL_PRICES = {
+    "anthropic/claude-sonnet-4.5": {"in": 3.0, "out": 15.0},
+    "anthropic/claude-haiku-4.5": {"in": 1.0, "out": 5.0},
     "anthropic/claude-3.5-sonnet": {"in": 3.0, "out": 15.0},
     "anthropic/claude-3.5-haiku": {"in": 0.8, "out": 4.0},
     "openai/gpt-4o-mini": {"in": 0.15, "out": 0.6},
