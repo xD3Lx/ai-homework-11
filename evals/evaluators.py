@@ -6,8 +6,8 @@ Three quality metrics required by the brief:
   * groundedness            — are the numbers in the answer backed by tool data
 
 Each evaluator returns a float in [0,1] so it works as a LangSmith evaluator and
-in the offline runner. In ONLINE mode `judge_success` can call a real LLM judge;
-offline it uses deterministic substring/number checks.
+in the local runner. `judge_success` uses deterministic substring/number checks
+by default; pass use_llm=True to defer to an LLM-as-judge.
 """
 from __future__ import annotations
 

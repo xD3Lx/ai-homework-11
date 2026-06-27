@@ -1,20 +1,14 @@
-"""Unified LLM interface over OpenRouter with a deterministic offline emulator.
+"""Unified LLM interface over OpenRouter (OpenAI-compatible).
 
 Two entry points:
   * chat()     — message-level tool-calling loop (baseline agent, data analyst)
   * complete() — single role-tagged completion (router, guardian, advisor, synth)
-
-In ONLINE mode both call OpenRouter (OpenAI-compatible). In OFFLINE mode both are
-served by offline_brain so the system is fully runnable without an API key.
 """
 from __future__ import annotations
 
 import json
-import uuid
 from dataclasses import dataclass, field
-from typing import Any
 
-from . import offline_brain as brain
 from .config import SETTINGS, price_for
 
 
@@ -34,11 +28,11 @@ class LLMResponse:
         )
 
 
-def _est_tokens(text: str) -> int:
-    return max(1, len(text or "") // 4)
-
-
 def _openrouter_client():
+    if not SETTINGS.openrouter_api_key:
+        raise RuntimeError(
+            "OPENROUTER_API_KEY is not set. Add it to your .env to run the agents."
+        )
     from openai import OpenAI
 
     return OpenAI(
@@ -56,11 +50,8 @@ def chat(
     role: str = "baseline",
 ) -> LLMResponse:
     model = model or SETTINGS.model_smart
-    if SETTINGS.offline:
-        return _mock_chat(messages, tools, model, role)
-
     client = _openrouter_client()
-    kwargs: dict[str, Any] = {"model": model, "messages": messages, "temperature": 0}
+    kwargs: dict = {"model": model, "messages": messages, "temperature": 0}
     if tools:
         kwargs["tools"] = tools
         kwargs["tool_choice"] = "auto"
@@ -78,48 +69,6 @@ def chat(
         "completion_tokens": resp.usage.completion_tokens,
     }
     return LLMResponse(content=msg.content, tool_calls=tcs, usage=usage, model=model)
-
-
-def _mock_chat(messages, tools, model, role) -> LLMResponse:
-    """Emulate OpenAI tool-calling using offline_brain."""
-    users = [m["content"] for m in messages if m.get("role") == "user"]
-    query = users[-1] if users else ""
-    history = users[:-1]
-    has_tool_results = any(m.get("role") == "tool" for m in messages)
-
-    ctx = brain.classify(query, history)
-
-    # First pass: decide on tool calls
-    if not has_tool_results:
-        planned = brain.plan_tools(query, ctx)
-        if planned:
-            tcs = [
-                {"id": f"call_{uuid.uuid4().hex[:8]}", "name": p["name"],
-                 "arguments": p["arguments"]}
-                for p in planned
-            ]
-            prompt_tok = _est_tokens(" ".join(m.get("content") or "" for m in messages))
-            return LLMResponse(
-                content=None, tool_calls=tcs,
-                usage={"prompt_tokens": prompt_tok, "completion_tokens": 30 * len(tcs)},
-                model=model,
-            )
-
-    # Second pass (or no tools needed): compose the final answer
-    results = []
-    for m in messages:
-        if m.get("role") == "tool":
-            try:
-                results.append(json.loads(m["content"]))
-            except (json.JSONDecodeError, TypeError):
-                pass
-    answer = brain.compose_answer(query, ctx, results)
-    prompt_tok = _est_tokens(" ".join(m.get("content") or "" for m in messages))
-    return LLMResponse(
-        content=answer, tool_calls=[],
-        usage={"prompt_tokens": prompt_tok, "completion_tokens": _est_tokens(answer)},
-        model=model,
-    )
 
 
 # ---- complete (role-tagged single turn) -------------------------------------
@@ -146,10 +95,6 @@ def complete(
     model: str | None = None,
 ) -> LLMResponse:
     model = model or SETTINGS.model_smart
-    if SETTINGS.offline:
-        return _mock_complete(role, query, history, results, draft, ctx, model)
-
-    # ONLINE: build a prompt per role and call the LLM
     sys = ROLE_SYSTEM.get(role, "Ти — корисний асистент.")
     parts = [f"Запит користувача: {query}"]
     if history:
@@ -159,34 +104,15 @@ def complete(
     if draft:
         parts.append("Чернетка відповіді для полірування:\n" + draft)
     if role == "router":
-        parts.append('Поверни JSON: {"intent": "...", "category": "...|null", '
-                     '"merchant": "...|null", "period": "...|null"}.')
+        parts.append(
+            'Поверни ЛИШЕ JSON без жодного тексту до чи після: '
+            '{"intent": "stat|advice|multistep|fraud|out_of_scope", '
+            '"category": "...|null", "merchant": "...|null", "period": "...|null"}.'
+        )
     if role == "guardian":
-        parts.append('Поверни JSON: {"action": "escalate|reject|allow", "reason": "..."}.')
+        parts.append('Поверни ЛИШЕ JSON: {"action": "escalate|reject|allow", "reason": "..."}.')
     user = "\n\n".join(parts)
-    resp = chat([{"role": "system", "content": sys}, {"role": "user", "content": user}],
-                model=model, role=role)
-    return resp
-
-
-def _mock_complete(role, query, history, results, draft, ctx, model) -> LLMResponse:
-    ctx = ctx or brain.classify(query, history)
-    if role == "router":
-        content = json.dumps(ctx, ensure_ascii=False)
-    elif role == "guardian":
-        if ctx["intent"] == "fraud":
-            action = {"action": "escalate", "reason": "suspected fraud"}
-        elif ctx["intent"] == "out_of_scope":
-            action = {"action": "reject", "reason": "out of scope"}
-        else:
-            action = {"action": "allow", "reason": "in scope"}
-        content = json.dumps(action, ensure_ascii=False)
-    elif role in {"advisor", "synthesizer"}:
-        content = draft if draft else brain.compose_answer(query, ctx, results or [])
-    else:
-        content = brain.compose_answer(query, ctx, results or [])
-    return LLMResponse(
-        content=content, tool_calls=[],
-        usage={"prompt_tokens": _est_tokens(query), "completion_tokens": _est_tokens(content)},
-        model=model,
+    return chat(
+        [{"role": "system", "content": sys}, {"role": "user", "content": user}],
+        model=model, role=role,
     )

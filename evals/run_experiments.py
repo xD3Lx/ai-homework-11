@@ -1,12 +1,12 @@
 """Run the golden set on both architectures and emit metrics.
 
-Offline: deterministic judge + evaluators, writes JSON + Markdown side-by-side.
-Online (LangSmith keys set): also uploads the dataset and runs LangSmith
-Experiments with the same evaluators for native trace-based metrics.
+Default: deterministic judge + evaluators, writes JSON + Markdown side-by-side
+to report/. With --langsmith (and LANGSMITH_API_KEY) it also uploads the dataset
+and runs LangSmith Experiments with the same evaluators for native trace metrics.
 
 Usage:
-    python evals/run_experiments.py            # offline metrics -> report/
-    LANGSMITH_API_KEY=... python evals/run_experiments.py --langsmith
+    python evals/run_experiments.py                       # metrics -> report/
+    python evals/run_experiments.py --langsmith --llm-judge
 """
 from __future__ import annotations
 
@@ -89,7 +89,7 @@ def render_markdown(crew: dict, base: dict) -> str:
         return f"| {label} | {fmt.format(base[key])} | {fmt.format(crew[key])} |"
 
     md = ["# Golden Set Results — Crew vs Baseline", "",
-          f"Mode: **{endpoint.mode()}** · Tasks: {crew['n_tasks']} "
+          f"LLM: **OpenRouter** · Tasks: {crew['n_tasks']} "
           f"({', '.join(f'{k}:{v}' for k, v in by_category().items())})", "",
           "| Metric | Baseline | Crew |", "|---|---|---|",
           line("success_rate", "success_rate"),
@@ -173,7 +173,7 @@ def maybe_langsmith():
 
 def main():
     use_ls = "--langsmith" in sys.argv
-    llm_judge = "--llm-judge" in sys.argv and not SETTINGS.offline
+    llm_judge = "--llm-judge" in sys.argv
     crew = run_architecture("crew", use_llm_judge=llm_judge)
     base = run_architecture("baseline", use_llm_judge=llm_judge)
     (OUT_DIR / "results.json").write_text(

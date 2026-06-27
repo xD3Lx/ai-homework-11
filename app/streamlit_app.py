@@ -23,7 +23,7 @@ with st.sidebar:
     st.header("⚙️ Налаштування")
     arch = st.radio("Архітектура", ["crew", "baseline"], index=0,
                     help="crew = multi-agent LangGraph · baseline = single-agent")
-    st.caption(f"Режим LLM: **{endpoint.mode()}**")
+    st.caption("LLM: **OpenRouter**")
     smart = st.text_input("MODEL_SMART", SETTINGS.model_smart)
     cheap = st.text_input("MODEL_CHEAP", SETTINGS.model_cheap)
     st.caption(f"Сьогодні (для відносних дат): {SETTINGS.today}")
@@ -31,9 +31,8 @@ with st.sidebar:
         st.session_state.pop("session", None)
         st.session_state.pop("turns", None)
         st.rerun()
-    if SETTINGS.offline:
-        st.info("Працює офлайн-режим (детермінований mock-LLM). Додай OPENROUTER_API_KEY "
-                "у .env, щоб увімкнути реальні моделі.")
+    if not SETTINGS.openrouter_api_key:
+        st.warning("OPENROUTER_API_KEY не задано — додай ключ у .env, щоб працювали агенти.")
 
 # session objects
 if st.session_state.get("arch") != arch:

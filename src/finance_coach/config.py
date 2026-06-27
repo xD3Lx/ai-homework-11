@@ -1,4 +1,4 @@
-"""Central configuration. Reads .env; degrades gracefully to offline mock mode."""
+"""Central configuration. Reads .env (OpenRouter + LangSmith + reference date)."""
 from __future__ import annotations
 
 import os
@@ -24,12 +24,6 @@ DB_PATH = Path(
 )
 
 
-def _to_bool(v: str | None, default: bool = False) -> bool:
-    if v is None:
-        return default
-    return v.strip().lower() in {"1", "true", "yes", "on"}
-
-
 @dataclass(frozen=True)
 class Settings:
     openrouter_api_key: str = os.getenv("OPENROUTER_API_KEY", "").strip()
@@ -41,12 +35,6 @@ class Settings:
     langsmith_api_key: str = os.getenv("LANGSMITH_API_KEY", "").strip()
     langsmith_project: str = os.getenv("LANGSMITH_PROJECT", "personal-finance-coach")
     now: str = os.getenv("FINANCE_COACH_NOW", "2025-11-30")
-    _force_offline: bool = _to_bool(os.getenv("FINANCE_COACH_OFFLINE"), False)
-
-    @property
-    def offline(self) -> bool:
-        """Offline (deterministic mock) when forced or no OpenRouter key."""
-        return self._force_offline or not self.openrouter_api_key
 
     @property
     def today(self) -> date:
@@ -55,7 +43,7 @@ class Settings:
 
 SETTINGS = Settings()
 
-# Approx OpenRouter prices ($ per 1M tokens) for cost estimation in offline traces.
+# Approx OpenRouter prices ($ per 1M tokens) for cost estimation in traces.
 MODEL_PRICES = {
     "anthropic/claude-sonnet-4.5": {"in": 3.0, "out": 15.0},
     "anthropic/claude-haiku-4.5": {"in": 1.0, "out": 5.0},

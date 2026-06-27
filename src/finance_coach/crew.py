@@ -11,10 +11,6 @@ Topology:
     START → router → {fraud→guardian, out_of_scope→guardian, else→data_analyst}
     data_analyst → advisor → synthesizer → END
     guardian → END
-
-Uses LangGraph when installed. If LangGraph is unavailable the SAME node
-functions run through a minimal sequential executor, so behaviour is identical
-and the offline test suite still exercises the full crew.
 """
 from __future__ import annotations
 
@@ -23,7 +19,6 @@ import time
 from typing import Any, TypedDict
 
 from . import llm, tools
-from . import offline_brain as brain
 from .config import SETTINGS
 from .obs import traceable
 from .types import RunResult, TraceStep
@@ -50,12 +45,7 @@ def _extract_json(text: str | None) -> dict | None:
     except (json.JSONDecodeError, TypeError):
         return None
 
-try:
-    from langgraph.graph import END, START, StateGraph  # type: ignore
-
-    HAVE_LANGGRAPH = True
-except Exception:
-    HAVE_LANGGRAPH = False
+from langgraph.graph import END, START, StateGraph
 
 
 DATA_ANALYST_PROMPT = (
@@ -92,14 +82,12 @@ def node_router(state: CrewState) -> CrewState:
     s0 = time.perf_counter()
     resp = llm.complete("router", state["query"], history=_hist_users(state),
                         model=SETTINGS.model_cheap)
-    # robust parse; fall back to the deterministic classifier if the LLM
-    # returned prose instead of clean JSON.
-    parsed = _extract_json(resp.content)
-    fallback = brain.classify(state["query"], _hist_users(state))
-    ctx = {k: (parsed.get(k) if parsed else None) or fallback.get(k)
-           for k in ("intent", "category", "merchant", "period")} if parsed else fallback
+    # robust parse; default to a plain stat query if the LLM returned prose
+    # instead of clean JSON.
+    parsed = _extract_json(resp.content) or {}
+    ctx = {k: parsed.get(k) for k in ("intent", "category", "merchant", "period")}
     if ctx.get("intent") not in {"stat", "advice", "multistep", "fraud", "out_of_scope"}:
-        ctx["intent"] = fallback["intent"]
+        ctx["intent"] = "stat"
     res.agents_used.append("router")
     res.inter_agent_tokens += resp.usage["prompt_tokens"]
     _acc(res, resp, "agent", "router", f"intent={ctx['intent']}",
@@ -236,19 +224,7 @@ def build_graph():
     return g.compile()
 
 
-_GRAPH = build_graph() if HAVE_LANGGRAPH else None
-
-
-def _run_fallback(state: CrewState) -> CrewState:
-    """Identical node sequence without LangGraph (for envs lacking the dep)."""
-    state.update(node_router(state))
-    if state["route"] in {"fraud", "out_of_scope"}:
-        state.update(node_guardian(state))
-        return state
-    state.update(node_data_analyst(state))
-    state.update(node_advisor(state))
-    state.update(node_synthesizer(state))
-    return state
+_GRAPH = build_graph()
 
 
 @traceable(name="crew", tags=["architecture:crew"])
@@ -257,10 +233,7 @@ def run(query: str, history: list[dict] | None = None) -> RunResult:
     res = RunResult(answer="", architecture="crew")
     state: CrewState = {"query": query, "history": history or [], "result": res,
                         "tool_results": []}
-    if HAVE_LANGGRAPH:
-        out = _GRAPH.invoke(state)
-    else:
-        out = _run_fallback(state)
+    out = _GRAPH.invoke(state)
     res.answer = out.get("answer", "")
     res.latency_ms = (time.perf_counter() - t0) * 1000
     return res

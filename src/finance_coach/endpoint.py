@@ -6,7 +6,6 @@ Also provides a tiny in-memory multi-turn session so follow-ups like
 from __future__ import annotations
 
 from . import baseline, crew
-from .config import SETTINGS
 from .types import RunResult
 
 ARCHITECTURES = {"crew": crew.run, "baseline": baseline.run}
@@ -37,7 +36,3 @@ class Session:
 
     def reset(self) -> None:
         self.history = []
-
-
-def mode() -> str:
-    return "offline (mock LLM)" if SETTINGS.offline else "online (OpenRouter)"
