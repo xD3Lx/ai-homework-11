@@ -15,19 +15,6 @@ import re
 from typing import Any
 
 NUM_RE = re.compile(r"-?\d[\d,]*\.?\d*")
-NUM_ONLY_RE = re.compile(r"^\$?\s*-?\d[\d,]*\.?\d*\s*%?$")
-
-TEXT_ALIASES = {
-    "$": ("$", "usd", "долар"),
-    "доставка": ("достав", "delivery"),
-    "погашення": ("погаш", "виплат", "закри"),
-    "поза": ("поза", "не можу", "не підтрим", "недоступ", "не входить", "відмов"),
-    "підтримк": ("підтримк", "support", "чат", "оператор", "банк"),
-    "служб": ("служб", "support", "чат", "оператор", "банк"),
-    "продукт": ("продукт", "groceries", "супермаркет"),
-    "рік": ("рік", "річн", "annual", "year"),
-    "різниця": ("різниц", "difference", "більше", "менше", "порівня"),
-}
 
 
 def _nums(text: str) -> set[float]:
@@ -38,41 +25,6 @@ def _nums(text: str) -> set[float]:
         except ValueError:
             pass
     return out
-
-
-def _is_numeric_requirement(text: str) -> bool:
-    return bool(NUM_ONLY_RE.fullmatch((text or "").strip()))
-
-
-def _number_value(text: str) -> float | None:
-    nums = _nums(text)
-    if len(nums) != 1:
-        return None
-    return next(iter(nums))
-
-
-def _matches_number(expected: float, actual: float, tol: float = 0.02) -> bool:
-    threshold = max(0.5, abs(expected) * tol)
-    return (
-        abs(actual - expected) <= threshold
-        or abs(abs(actual) - abs(expected)) <= threshold
-    )
-
-
-def _has_required_text(answer: str, required: str) -> bool:
-    req = required.lower()
-    if req in answer:
-        return True
-    return any(alias in answer for alias in TEXT_ALIASES.get(req, ()))
-
-
-def _has_required_fact(answer: str, required: str) -> bool:
-    if _is_numeric_requirement(required):
-        expected = _number_value(required)
-        if expected is None:
-            return False
-        return any(_matches_number(expected, actual) for actual in _nums(answer))
-    return _has_required_text(answer, required)
 
 
 def tool_selection_accuracy(expected: list[str], used: list[str]) -> float:
@@ -129,7 +81,7 @@ def judge_success(task: dict, answer: str, used_tools: list[str],
         return _llm_judge(task, answer)
     ans = (answer or "").lower()
     for sub in task.get("must_include", []):
-        if not _has_required_fact(ans, sub):
+        if sub.lower() not in ans:
             return 0.0
     for sub in task.get("must_not_include", []):
         if sub.lower() in ans:

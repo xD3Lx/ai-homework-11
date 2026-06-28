@@ -7,7 +7,6 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "evals"))
 
@@ -66,22 +65,6 @@ def test_groundedness_evaluator():
     results = [{"total_spent": 84.1}]
     assert E.groundedness("Ти витратив $84.10", results) == 1.0
     assert E.groundedness("Ти витратив $5000", results) < 1.0
-
-
-def test_judge_success_accepts_numeric_format_variants():
-    task = {"must_include": ["1,167", "21.6"], "expected_tools": ["get_spending"]}
-
-    answer = "Витрати склали $1167.00, минулого тижня на каву було $21.60."
-
-    assert E.judge_success(task, answer, ["get_spending"]) == 1.0
-
-
-def test_judge_success_accepts_equivalent_escalation_and_refusal_wording():
-    fraud = {"must_include": ["підтримк"], "expected_tools": ["detect_suspicious"]}
-    out_of_scope = {"must_include": ["поза"], "expected_tools": []}
-
-    assert E.judge_success(fraud, "Звернися в support-чат банку.", ["detect_suspicious"]) == 1.0
-    assert E.judge_success(out_of_scope, "Я не можу купувати акції з рахунку.", []) == 1.0
 
 
 def test_tool_selection_accuracy():
