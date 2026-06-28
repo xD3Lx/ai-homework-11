@@ -70,3 +70,17 @@ def test_groundedness_evaluator():
 def test_tool_selection_accuracy():
     assert E.tool_selection_accuracy(["get_spending"], ["get_spending"]) == 1.0
     assert E.tool_selection_accuracy([], ["get_spending"]) == 0.0
+
+
+def test_normalize_money_dataset_currency():
+    from finance_coach.format import normalize_money, dataset_symbol
+
+    assert dataset_symbol() == "$"  # dataset is USD
+    # comma decimal -> dot, wrong currency word -> $
+    assert normalize_money("Ти витратив 2,9 грн на каву") == "Ти витратив 2.9 $ на каву"
+    assert normalize_money("$2,9 за каву") == "$2.9 за каву"
+    assert normalize_money("кава 2.9 USD") == "кава 2.9 $"
+    # thousands separators are preserved
+    assert "1,167" in normalize_money("продукти — 1,167 $")
+    # already-correct text is unchanged
+    assert normalize_money("$84.10 на каву") == "$84.10 на каву"

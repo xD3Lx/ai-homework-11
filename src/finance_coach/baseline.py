@@ -11,6 +11,7 @@ import time
 from .obs import traceable
 
 from . import llm, tools
+from .format import normalize_money
 from .config import SETTINGS
 from .types import RunResult, TraceStep
 
@@ -23,7 +24,9 @@ SYSTEM_PROMPT = (
     f"Сьогоднішня дата (today) у системі: {SETTINGS.today.isoformat()} — рахуй усі "
     "відносні періоди саме від неї, а не від реальної поточної дати. Для відносних "
     "діапазонів використовуй параметр `period` (last_week, this_month тощо), а не "
-    "власні start/end."
+    "власні start/end. "
+    "ВАЛЮТА в датасеті — долари США: завжди показуй суми у '$' з КРАПКОЮ як "
+    "десятковим роздільником (напр. 2.90), ніколи не пиши 'грн' чи інші валюти."
 )
 
 MAX_STEPS = 5
@@ -86,5 +89,6 @@ def run(query: str, history: list[dict] | None = None) -> RunResult:
         if not res.answer:
             res.answer = "Не вдалося завершити аналіз за відведену кількість кроків."
 
+    res.answer = normalize_money(res.answer)
     res.latency_ms = (time.perf_counter() - t0) * 1000
     return res

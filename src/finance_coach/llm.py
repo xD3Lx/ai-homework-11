@@ -83,6 +83,12 @@ ROLE_SYSTEM = {
                    "числа лише з наданих даних.",
 }
 
+# Single-currency dataset (USD). Appended to advisor/synthesizer prompts.
+CURRENCY_RULE = (
+    "Валюта в датасеті — долари США: показуй суми у '$' з КРАПКОЮ як десятковим "
+    "роздільником (напр. 2.90); ніколи не пиши 'грн' чи інші валюти."
+)
+
 
 def complete(
     role: str,
@@ -96,6 +102,8 @@ def complete(
 ) -> LLMResponse:
     model = model or SETTINGS.model_smart
     sys = ROLE_SYSTEM.get(role, "Ти — корисний асистент.")
+    if role in {"advisor", "synthesizer"}:
+        sys = sys + " " + CURRENCY_RULE
     parts = [f"Запит користувача: {query}"]
     if history:
         parts.append("Попередні репліки користувача: " + " | ".join(history))

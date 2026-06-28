@@ -20,6 +20,7 @@ from typing import Any, TypedDict
 
 from . import llm, tools
 from .config import SETTINGS
+from .format import normalize_money
 from .obs import traceable
 from .types import RunResult, TraceStep
 
@@ -234,6 +235,6 @@ def run(query: str, history: list[dict] | None = None) -> RunResult:
     state: CrewState = {"query": query, "history": history or [], "result": res,
                         "tool_results": []}
     out = _GRAPH.invoke(state)
-    res.answer = out.get("answer", "")
+    res.answer = normalize_money(out.get("answer", ""))
     res.latency_ms = (time.perf_counter() - t0) * 1000
     return res
