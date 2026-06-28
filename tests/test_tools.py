@@ -11,7 +11,7 @@ sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "evals"))
 
 from finance_coach import tools  # noqa: E402
-import evaluators as E  # noqa: E402
+import evals.evaluators as E  # noqa: E402
 
 
 def test_get_spending_coffee_last_week():
