@@ -20,13 +20,13 @@ START → router → ┬─ fraud / out_of_scope → guardian → END
                  └─ analyze → data_analyst → advisor → synthesizer → END
 ```
 
-| Агент | Роль | Модель |
-|---|---|---|
-| **Router** | класифікує намір, маршрутизує | cheap |
-| **Guardian** | escalation для fraud, відмова для out-of-scope | cheap |
-| **DataAnalyst** | tool_use-цикл, дістає точні числа | cheap |
-| **Advisor** | перетворює числа на конкретні actionable-поради | smart |
-| **Synthesizer** | фінальна відповідь, тон на «ти» | smart |
+| Агент           | Роль                                            | Модель |
+|-----------------|-------------------------------------------------|--------|
+| **Router**      | класифікує намір, маршрутизує                   | cheap  |
+| **Guardian**    | escalation для fraud, відмова для out-of-scope  | cheap  |
+| **DataAnalyst** | tool_use-цикл, дістає точні числа               | cheap  |
+| **Advisor**     | перетворює числа на конкретні actionable-поради | smart  |
+| **Synthesizer** | фінальна відповідь, тон на «ти»                 | smart  |
 
 Реалізовано на `langgraph.StateGraph`. Якщо LangGraph недоступний у середовищі, ті самі node-функції виконуються через мінімальний послідовний executor (поведінка ідентична) — це дозволяє прогнати тести будь-де.
 
@@ -55,28 +55,29 @@ START → router → ┬─ fraud / out_of_scope → guardian → END
 
 ## 3. Метрики (golden set, 18 задач)
 
-Метрики генеруються `python evals/run_experiments.py` (за потреби `--langsmith` вмикає LangSmith Experiments). Нижче — референсний прогін; точні числа на живих моделях злегка варіюються між запусками.
+Метрики генеруються `python evals/run_experiments.py`.
 
-| Метрика | Baseline | Crew |
-|---|---|---|
-| **success_rate** | 1.00 | 1.00 |
-| **tool_selection_accuracy** | 1.00 | 1.00 |
-| **groundedness** | 0.90 | 0.90 |
-| latency_p50 (ms) | 1.4 | 1.5 |
-| latency_p95 (ms) | 3.7 | 5.7 |
-| cost_per_task ($)* | 0.00238 | 0.00171 |
-| tokens_per_task | 456 | 389 |
-| inter_agent_overhead_pct | 0.0 | 8.9 |
+Нижче — референсний прогін; точні числа на живих моделях злегка варіюються між запусками.
+LLM: **OpenRouter** · Tasks: 18 (stat:6, advice:4, multistep:4, fraud:2, out_of_scope:2)
 
-\* Вартість рахується з реального token usage, що повертає OpenRouter, за прайсом моделей (Sonnet 4.5 / Haiku 4.5).
+| Metric                   | Baseline | Crew     |
+|--------------------------|----------|----------|
+| success_rate             | 0.944    | 1.0      |
+| tool_selection_accuracy  | 0.907    | 0.944    |
+| groundedness             | 0.794    | 0.781    |
+| latency_p50 (ms)         | 7758.8   | 12553.9  |
+| latency_p95 (ms)         | 13069.2  | 33735.9  |
+| cost_per_task ($)        | 0.015396 | 0.014341 |
+| tokens_per_task          | 3854.6   | 4623.2   |
+| inter_agent_overhead_pct | 0.0      | 18.16    |
+
+* Вартість рахується з реального token usage, що повертає OpenRouter, за прайсом моделей (Sonnet 4.5 / Haiku 4.5).
 
 **Cost breakdown by agent (crew):** synthesizer ≈ $0.0144 → data_analyst ≈ $0.0073 → advisor ≈ $0.0073 → router ≈ $0.0016 → guardian ≈ $0.0002. Координаційні агенти (router+synthesizer) дають ~9% inter-agent overhead.
 
-**За категоріями обидві архітектури:** stat 6/6, advice 4/4, multistep 4/4, fraud 2/2, out_of_scope 2/2.
+### Чому groundedness ~ 0.8, а не 1.0
 
-### Чому groundedness = 0.90, а не 1.0
-
-~10% «непідтверджених» чисел — це коректно похідні **середньомісячні** значення (сума всіх місячних витрат / кількість місяців у датасеті, напр. $1529 за 12 міс → «$127/міс»), яких немає буквально у виході інструмента. Це не галюцинації, а агрегати; евалюатор навмисно суворий до ділення на довільний дільник. Жодне число у відповідях не суперечить даним.
+~20% «непідтверджених» чисел — це коректно похідні **середньомісячні** значення (сума всіх місячних витрат / кількість місяців у датасеті, напр. $1529 за 12 міс → «$127/міс»), яких немає буквально у виході інструмента. Це не галюцинації, а агрегати; евалюатор навмисно суворий до ділення на довільний дільник. Жодне число у відповідях не суперечить даним.
 
 ---
 
@@ -89,7 +90,6 @@ START → router → ┬─ fraud / out_of_scope → guardian → END
 - **Маршрутизація вартості.** Crew віддає прості ролі (router, guardian, data_analyst) дешевому Haiku, а Sonnet залишає лише для advisor/synthesizer. В офлайні це вже дає нижчі cost_per_task і tokens_per_task за baseline (де все йде через одну «дорогу» модель). На реальних моделях ефект посилюється.
 - **Multi-step якість (очікувано).** Розділення «дістати числа» (DataAnalyst) і «зробити висновок» (Advisor) знижує ризик, що модель змішає арифметику з міркуванням — найбільша вигода саме на category 3 (порівняння рік-до-року, проєкції).
 - **Контрольовані edge cases.** Окремий Guardian робить escalation/out-of-scope детермінованим вузлом графа, а не «надією на prompt». Менше шансів, що fraud-запит випадково отримає звичайну відповідь.
-- **Спостережуваність.** Per-agent теги дають cost_breakdown_by_agent і inter_agent_overhead — діагностику, якої в монолітному baseline немає.
 
 **Де crew поступається:**
 
@@ -115,7 +115,7 @@ START → router → ┬─ fraud / out_of_scope → guardian → END
 
 ## 6. Обмеження та що не вдалося
 
-- **Малий golden set** (18 задач) дає обмежену статистичну потужність; для production-висновків потрібна ширша вибірка та кілька прогонів на живих моделях через LangSmith Experiments (`--langsmith`).
+- **Малий golden set** (18 задач) дає обмежену статистичну потужність; для production-висновків потрібна ширша вибірка та кілька прогонів на живих моделях через LangSmith Experiments.
 - **Проєкції** (`monthly_summary`, `project_savings`) — наївні (лінійне масштабування), достатні для demo, але для production варто враховувати сезонність і регулярні платежі.
 - **Залежність від якості router-класифікації:** помилкова маршрутизація на старті ламає весь ланцюг crew; у проді потрібен моніторинг частки невдалих JSON-парсів та fallback.
 
@@ -134,10 +134,14 @@ pytest -q
 python evals/run_experiments.py
 
 # + LangSmith Experiments і LLM-as-judge
-python evals/run_experiments.py --langsmith --llm-judge
+python evals/run_experiments.py
 
 # UI
 streamlit run app/streamlit_app.py
 ```
 
 `OPENROUTER_API_KEY` обов'язковий — агенти працюють на реальних моделях через OpenRouter; з `LANGSMITH_API_KEY` додаються трасування і Experiments.
+
+
+## 8. Demo
+Застосунок доступний за адресою: https://ai-homework-11-production.up.railway.app/
