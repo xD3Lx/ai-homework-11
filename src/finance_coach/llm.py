@@ -35,10 +35,20 @@ def _openrouter_client():
         )
     from openai import OpenAI
 
-    return OpenAI(
+    client = OpenAI(
         api_key=SETTINGS.openrouter_api_key,
         base_url=SETTINGS.openrouter_base_url,
     )
+    # Wrap with LangSmith so each completion is logged as an LLM run with token
+    # usage (and cost, once the model's pricing is registered in LangSmith).
+    if SETTINGS.langsmith_api_key:
+        try:
+            from langsmith.wrappers import wrap_openai
+
+            return wrap_openai(client)
+        except Exception:
+            pass
+    return client
 
 
 # ---- chat (tool loop) -------------------------------------------------------
