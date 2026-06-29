@@ -74,7 +74,7 @@ def _flatten(obj: Any) -> str:
 
 
 def judge_success(task: dict, answer: str, used_tools: list[str],
-                  use_llm: bool = False) -> float:
+                  use_llm: bool = True) -> float:
     """Deterministic judge: required substrings present, forbidden absent,
     and key tools used. Set use_llm=True (online) to defer to an LLM judge."""
     if use_llm:
