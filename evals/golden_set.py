@@ -23,7 +23,7 @@ GOLDEN: list[dict] = [
         "category": "stat",
         "intent": "stat",
         "expected_tools": ["top_categories"],
-        "must_include": ["продукт", "1,167"],
+        "must_include": ["продукт", "1167"],
     },
     {
         "id": "stat_netflix_last",
@@ -39,7 +39,7 @@ GOLDEN: list[dict] = [
         "category": "stat",
         "intent": "stat",
         "expected_tools": ["get_spending"],
-        "must_include": ["1,167"],
+        "must_include": ["1167"],
     },
     {
         "id": "stat_delivery_year",
@@ -47,7 +47,7 @@ GOLDEN: list[dict] = [
         "category": "stat",
         "intent": "stat",
         "expected_tools": ["get_spending"],
-        "must_include": ["$"],
+        "must_include": ["$24.31"],
     },
     # --- category 2: data-grounded savings advice ---
     {

@@ -109,8 +109,26 @@ def _llm_judge(task: dict, answer: str) -> float:
         'Поверни лише JSON {"pass": true|false}.'
     )
     resp = llm.chat([{"role": "user", "content": prompt}])
+    obj = _parse_json(resp.content)
+    return 1.0 if obj and obj.get("pass") else 0.0
+
+
+def _parse_json(text: str | None) -> dict | None:
+    """Parse a JSON object from an LLM reply that may include code fences/prose."""
+    if not text:
+        return None
     import json
+
+    candidate = text.strip()
+    fence = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", candidate, re.S)
+    if fence:
+        candidate = fence.group(1)
+    else:
+        brace = re.search(r"\{.*\}", candidate, re.S)
+        if brace:
+            candidate = brace.group(0)
     try:
-        return 1.0 if json.loads(resp.content).get("pass") else 0.0
-    except Exception:
-        return 0.0
+        obj = json.loads(candidate)
+        return obj if isinstance(obj, dict) else None
+    except (json.JSONDecodeError, TypeError):
+        return None

@@ -114,7 +114,7 @@ def render_markdown(crew: dict, base: dict) -> str:
     return "\n".join(md)
 
 
-def maybe_langsmith():
+def langsmith():
     """Upload dataset + run LangSmith experiments when configured."""
     if not SETTINGS.langsmith_api_key:
         print("[langsmith] no LANGSMITH_API_KEY — skipping cloud experiments.")
@@ -172,17 +172,14 @@ def maybe_langsmith():
 
 
 def main():
-    use_ls = "--langsmith" in sys.argv
-    llm_judge = "--llm-judge" in sys.argv
-    crew = run_architecture("crew", use_llm_judge=llm_judge)
-    base = run_architecture("baseline", use_llm_judge=llm_judge)
+    crew = run_architecture("crew", use_llm_judge=True)
+    base = run_architecture("baseline", use_llm_judge=True)
     (OUT_DIR / "results.json").write_text(
         json.dumps({"crew": crew, "baseline": base}, ensure_ascii=False, indent=2))
     md = render_markdown(crew, base)
     (OUT_DIR / "results.md").write_text(md)
     print(md)
-    if use_ls:
-        maybe_langsmith()
+    langsmith()
 
 
 if __name__ == "__main__":
