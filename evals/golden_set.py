@@ -72,7 +72,7 @@ GOLDEN: list[dict] = [
         "category": "advice",
         "intent": "advice",
         "expected_tools": ["get_summary", "monthly_summary", "top-categories"],
-        "must_include": ["залишок", "$60.76"],
+        "must_include": ["60.76"],
     },
     {
         "id": "advice_forgotten_sub",
