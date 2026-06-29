@@ -230,19 +230,28 @@ def detect_suspicious(account: str | None = "credit_card") -> dict[str, Any]:
 
 
 def project_savings(
-    category: str, reduction_pct: float, period: str = "last_3_months"
+    category: str, reduction_pct: float, period: str | None = None
 ) -> dict[str, Any]:
-    """Project monthly & annual savings from reducing a category by reduction_pct."""
-    sp = get_spending(category=category, period=period)
-    s, e = D.resolve_period(period)
-    months = max(1, ((e - s).days / 30.0)) if s and e else 1
-    monthly = sp["total_spent"] / months
+    """Project monthly & annual savings from reducing a category by reduction_pct.
+
+    Average monthly spend = total category spend over the whole dataset divided by
+    the number of distinct calendar months in the dataset
+    (i.e. the average of the per-month costs). The `period` argument is accepted
+    for API compatibility but ignored — the projection is always dataset-wide.
+    """
+    df = D.load_df()
+    f = df[(df["category"].str.lower() == category.lower()) & (df["amount"] < 0)]
+    months = int(df["date"].dt.to_period("M").nunique()) or 1
+    total = -f["amount"].sum()
+    monthly = total / months
     saved_monthly = _round(monthly * reduction_pct / 100.0)
     return {
         "tool": "project_savings",
         "category": category,
         "reduction_pct": reduction_pct,
-        "basis_period": period,
+        "basis": "full_dataset",
+        "months_in_dataset": months,
+        "total_spend": _round(total),
         "avg_monthly_spend": _round(monthly),
         "monthly_savings": saved_monthly,
         "annual_savings": _round(saved_monthly * 12),

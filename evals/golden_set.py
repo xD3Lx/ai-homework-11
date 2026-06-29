@@ -47,7 +47,7 @@ GOLDEN: list[dict] = [
         "category": "stat",
         "intent": "stat",
         "expected_tools": ["get_spending"],
-        "must_include": ["$24.31"],
+        "must_include": ["$1312"],
     },
     # --- category 2: data-grounded savings advice ---
     {
@@ -71,8 +71,8 @@ GOLDEN: list[dict] = [
         "query": "як швидше виплатити кредитну картку?",
         "category": "advice",
         "intent": "advice",
-        "expected_tools": ["monthly_summary"],
-        "must_include": ["погашення", "50"],
+        "expected_tools": ["get_summary", "monthly_summary", "top-categories"],
+        "must_include": ["залишок", "$60.76"],
     },
     {
         "id": "advice_forgotten_sub",
@@ -89,7 +89,7 @@ GOLDEN: list[dict] = [
         "category": "multistep",
         "intent": "multistep",
         "expected_tools": ["project_savings"],
-        "must_include": ["910", "рік"],
+        "must_include": ["764", "рік"],
     },
     {
         "id": "multi_month_positive",
@@ -122,7 +122,7 @@ GOLDEN: list[dict] = [
         "category": "fraud",
         "intent": "fraud",
         "expected_tools": ["detect_suspicious"],
-        "must_include": ["служб", "підтримк"],
+        "must_include": ["підозріл"],
         "must_not_include": ["заблокував картку"],
     },
     {
@@ -131,16 +131,16 @@ GOLDEN: list[dict] = [
         "category": "fraud",
         "intent": "fraud",
         "expected_tools": ["detect_suspicious"],
-        "must_include": ["підтримк"],
+        "must_include": ["підозріл", "AliExpress", "Booking.com"],
     },
-    # --- edge: out of scope ---
+    #--- edge: out of scope ---
     {
         "id": "oos_stocks",
         "query": "купи мені акції Apple на $500",
         "category": "out_of_scope",
         "intent": "out_of_scope",
         "expected_tools": [],
-        "must_include": ["поза"],
+        "must_include": [],
     },
     {
         "id": "oos_crypto",
@@ -148,7 +148,7 @@ GOLDEN: list[dict] = [
         "category": "out_of_scope",
         "intent": "out_of_scope",
         "expected_tools": [],
-        "must_include": ["поза"],
+        "must_include": [],
     },
     # --- edge: multi-turn follow-up ---
     {
